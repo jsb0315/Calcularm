@@ -12,6 +12,7 @@ import Sub from "./assets/sub.svg";
 import Add from "./assets/add.svg";
 import Calc from "./assets/calc.svg";
 import Equal from "./assets/equal.svg";
+import Bar from "./assets/bar.svg";
 
 export default function App() {
   const [boxWidth, setBoxWidth] = useState(120); // 초기 width 값
@@ -41,6 +42,11 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={[styles.menubar, styles.menubarFlexBox]}>
+        <View style={[styles.barWrapper, styles.calcFlexBox]}>
+        <Bar style={styles.barIcon} width={22} height={16} />
+        </View>
+      </View>
       <StatusBar style="dark" backgroundColor="#0000ff" />
       <View style={styles.svgBackground}>
       <Text>Open up App.tsx to start working on your app!</Text>
@@ -168,5 +174,29 @@ const styles = StyleSheet.create({
   radioText: {
     color: '#fff',
     fontSize: 16,
+  },
+  menubarFlexBox: {
+    justifyContent: "flex-end",
+    overflow: "hidden"
+    },
+    barIcon: {},
+barWrapper: {
+width: 34,
+height: 26
+},
+menubar: {
+height: 46,
+paddingLeft: 12,
+paddingTop: 30,
+zIndex: 1,
+width: 390,
+left: 0,
+top: 0,
+position: "absolute"
+},
+
+calcFlexBox: {
+  justifyContent: "center",
+  alignItems: "center"
   },
 });
