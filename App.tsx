@@ -44,8 +44,8 @@ export default function App() {
   };
 
   const handleNumberPress = (num: string) => {
-    if (!Running){
-      if (textPrev&&textNext){
+    if (!Running) {
+      if (textPrev && textNext) {
         setTextPrev(""); // textPrev 초기화
         setTextNext(num); // textNext에 숫자 설정
       } else if (textNext.length < 4) {
@@ -55,20 +55,20 @@ export default function App() {
   };
 
   const handleEqualPress = () => {
-    if (!Running){
+    if (!Running) {
       setTextPrev(textNext); // textNext 값을 textPrev로 복사
-      setTextNext(textNext.length ? () => {setisRunning(true); return "result"} : getCurrentTimeAsString()); // textNext를 'result'로 설정
+      setTextNext(textNext.length ? () => { setisRunning(true); return "result" } : getCurrentTimeAsString()); // textNext를 'result'로 설정
     }
   };
 
   const handleDotPress = () => {
-    if (!Running){
+    if (!Running) {
       setTextNext((prev) => (prev.includes(".") ? prev : prev + "."));
     }
   };
 
   const handleOperatorPress = (operator: string) => {
-    if (/^0+$/.test(textNext) || !textNext.length || textPrev.length){
+    if (/^0+$/.test(textNext) || !textNext.length || textPrev.length) {
       setOperator("")
     }
     else {
@@ -78,20 +78,24 @@ export default function App() {
   };
 
   const handleFlipAMPM = () => {
-    if (!Running){
+    if (!Running) {
       setTextNext((prev) => {
+        if (prev.length === 3) {
+          prev = `0${prev}`; // 3자리일 경우 가장 앞에 '0' 추가
+        }
+
         if (prev.length !== 4 || isNaN(Number(prev))) {
           return prev; // 유효하지 않은 값은 그대로 반환
         }
-        
+
         // 1. '2000'을 '20:00'으로 변환
         const hours = parseInt(prev.slice(0, 2), 10);
         const minutes = prev.slice(2);
-        
+
         // 2. 12시간 추가
         const newHours = (hours + 12) % 24; // 24시간 형식으로 계산
         const formattedHours = newHours < 10 ? `0${newHours}` : `${newHours}`;
-  
+
         // 3. '800' 형식으로 변환
         return `${formattedHours}${minutes}`;
       });
@@ -99,35 +103,39 @@ export default function App() {
   };
 
   const handleFixTime = () => {
-    if (!Running){
+    if (!Running) {
       setTextNext((prev) => {
+        if (prev.length === 3) {
+          prev = `0${prev}`; // 3자리일 경우 가장 앞에 '0' 추가
+        }
+
         if (prev.length !== 4 || isNaN(Number(prev))) {
           return prev; // 유효하지 않은 값은 그대로 반환
         }
-        
+
         // 1. 시간과 분 분리
-      let hours = parseInt(prev.slice(0, 2), 10); // 앞 두 자리는 시간
-      let minutes = parseInt(prev.slice(2), 10); // 뒤 두 자리는 분
-      
-      // 2. 분이 60 이상일 경우 시간으로 올림
-      if (minutes >= 60) {
-        hours += Math.floor(minutes / 60); // 초과된 분을 시간으로 올림
-        minutes = minutes % 60; // 남은 분
-      }
-      
-      // 3. 시간이 24 이상일 경우 24로 나눈 나머지 계산
-      if (hours >= 24) {
-        hours = hours % 24;
-      }
-      
-      // 4. 시간과 분을 두 자리 형식으로 변환
-      const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
-      const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-      
-      // 5. 결과 반환
-      return `${formattedHours}${formattedMinutes}`;
-    });
-  }
+        let hours = parseInt(prev.slice(0, 2), 10); // 앞 두 자리는 시간
+        let minutes = parseInt(prev.slice(2), 10); // 뒤 두 자리는 분
+
+        // 2. 분이 60 이상일 경우 시간으로 올림
+        if (minutes >= 60) {
+          hours += Math.floor(minutes / 60); // 초과된 분을 시간으로 올림
+          minutes = minutes % 60; // 남은 분
+        }
+
+        // 3. 시간이 24 이상일 경우 24로 나눈 나머지 계산
+        if (hours >= 24) {
+          hours = hours % 24;
+        }
+
+        // 4. 시간과 분을 두 자리 형식으로 변환
+        const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+
+        // 5. 결과 반환
+        return `${formattedHours}${formattedMinutes}`;
+      });
+    }
   };
 
   return (
@@ -156,7 +164,7 @@ export default function App() {
             <Text style={[styles.text_next, styles.textTypo]}>
               {Operator}{textNext.length > 2
                 ? `${textNext.slice(0, -2)}:${textNext.slice(-2)}`
-                : textNext.length ? textNext : "0"} 
+                : textNext.length ? textNext : "0"}
             </Text>
           </View>
 
@@ -206,7 +214,7 @@ export default function App() {
               <ButtonCustom
                 element="sub" text="-" btncolor="orange"
                 onPress={() => handleOperatorPress("-")}
-                bgColor={Operator==="-" ? ["#fb7103", "#FCC78E"] : undefined}
+                bgColor={Operator === "-" ? ["#fb7103", "#FCC78E"] : undefined}
               />
             </View>
             <View style={styles.row2}>
@@ -220,7 +228,7 @@ export default function App() {
               <ButtonCustom
                 element="add" text="+" btncolor="orange"
                 onPress={() => handleOperatorPress("+")}
-                bgColor={Operator==="+" ? ["#fb7103", "#FCC78E"] : undefined}
+                bgColor={Operator === "+" ? ["#fb7103", "#FCC78E"] : undefined}
               />
             </View>
             <View style={styles.row2}>

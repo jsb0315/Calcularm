@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { StyleSheet, View, Text, Pressable , Animated, Easing } from "react-native";
+import { StyleSheet, View, Text, Pressable, Animated, Easing } from "react-native";
 
 import Sign from "../assets/sign.svg";
 import Perc from "../assets/perc.svg";
@@ -35,14 +35,14 @@ const elements = (
   element !== 'text' && svgMap[element.toLowerCase() as keyof typeof svgMap] ? svgMap[element.toLowerCase() as keyof typeof svgMap] : <Text style={styles.elem}>{text || "AC"}</Text>;
 
 
-const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }: { 
-  element: keyof typeof svgMap, 
-  text?: string, 
+const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }: {
+  element: keyof typeof svgMap,
+  text?: string,
   btncolor: keyof typeof colorOptions
   onPress?: () => void;
   onLongPress?: () => void;
-  bgColor?: string []
- }) => {
+  bgColor?: string[]
+}) => {
   const backgroundColor = useRef(new Animated.Value(0)).current; // 애니메이션 값 초기화
 
   const handlePressIn = () => {
@@ -75,27 +75,27 @@ const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={handlePressIn}
-      onPressOut={handlePressOut} 
+      onPressOut={handlePressOut}
     >
-        <View style={[styles.buttonGrayColor, styles.buttonColorFlexBox]}>
-          <Animated.View
-            style={[
-              { backgroundColor: interpolatedColor },
-              styles.circleFrame,
-              styles.frameElemFlexBox,
-            ]}
-          />
-        </View>
-        <View style={[styles.frameElem, styles.frameElemFlexBox]}>
-          {elements(element, text)}
-        </View>
+      <View style={[styles.buttonGrayColor, styles.buttonColorFlexBox]}>
+        <Animated.View
+          style={[
+            { backgroundColor: interpolatedColor },
+            styles.circleFrame,
+            styles.frameElemFlexBox,
+          ]}
+        />
+      </View>
+      <View style={[styles.frameElem, styles.frameElemFlexBox]}>
+        {elements(element, text)}
+      </View>
     </Pressable >
   );
 };
 
 const styles = StyleSheet.create({
   elem: {
-    fontSize: 35,
+    fontSize: 34.5,
     fontFamily: "Inter-Regular",
     color: "#fff",
     textAlign: "left",
@@ -122,14 +122,6 @@ const styles = StyleSheet.create({
   buttonGrayColor: {
     zIndex: 0
   },
-  ac: {
-    alignSelf: "stretch",
-    fontSize: 35,
-    fontFamily: "Inter-Regular",
-    color: "#fff",
-    textAlign: "left",
-    flex: 1
-  },
   frameElem: {
     position: "absolute",
     width: 68,
@@ -144,6 +136,5 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   }
 });
-
 
 export default ButtonCustom;
