@@ -1,21 +1,52 @@
-import React, { useState, useRef } from "react";
-import { StyleSheet, View, TouchableWithoutFeedback, Animated, Easing } from "react-native";
+import React, { useRef } from "react";
+import { StyleSheet, View, Text, TouchableWithoutFeedback, Animated, Easing } from "react-native";
 
-const ButtonCustom = ({ element, btncolor }: { element: React.ReactNode, btncolor: string[] }) => {
-  const [isPressed, setIsPressed] = useState(false);const backgroundColor = useRef(new Animated.Value(0)).current; // 애니메이션 값 초기화
+import Sign  from "../assets/sign.svg";
+import Perc  from "../assets/perc.svg";
+import Div   from "../assets/div.svg";
+import Mul   from "../assets/mul.svg";
+import Sub   from "../assets/sub.svg";
+import Add   from "../assets/add.svg";
+import Calc  from "../assets/calc.svg";
+import Equal from "../assets/equal.svg";
+
+const colorOptions = {
+  gray: ["#5C5C5E", "#8C8C8C"],
+  black: ["#2A2A2C", "#727272"],
+  orange: ["#FF9F0A", "#FCC78E"],
+};
+
+const svgMap = {
+  text: <Text/>,
+  sign: <Sign height={27.5} width={27.5} />,
+  perc: <Perc height={27.5} width={27.5} />,
+  div: <Div height={27.5} width={27.5} />,
+  mul: <Mul height={27.5} width={27.5} />,
+  sub: <Sub height={27.5} width={27.5} />,
+  add: <Add height={27.5} width={27.5} />,
+  calc: <Calc height={27.5} width={27.5} />,
+  equal: <Equal height={27.5} width={27.5} />,
+};
+
+const elements = (
+  element: string, text?: string) =>
+  element !== 'text' && svgMap[element.toLowerCase() as keyof typeof svgMap] ? svgMap[element.toLowerCase() as keyof typeof svgMap] : <Text style={styles.elem}>{text || "AC"}</Text>;
+
+
+const ButtonCustom = ({ element, text, btncolor }: { element: keyof typeof svgMap, text?: string,btncolor: keyof typeof colorOptions }) => {
+  const backgroundColor = useRef(new Animated.Value(0)).current; // 애니메이션 값 초기화
 
   const handlePressIn = () => {
-    setIsPressed(true);
     Animated.timing(backgroundColor, {
       toValue: 1, // 목표값
       duration: 150, // 애니메이션 지속 시간 (ms)
       easing: Easing.out(Easing.exp),
       useNativeDriver: false, // 배경색 변경은 Native Driver를 사용할 수 없음
     }).start();
+    console.log("Button Pressed:", element, text);
   };
 
   const handlePressOut = () => {
-    setIsPressed(false);
     Animated.timing(backgroundColor, {
       toValue: 0, // 원래 값으로 복귀
       duration: 300, // 애니메이션 지속 시간 (ms)
@@ -27,7 +58,7 @@ const ButtonCustom = ({ element, btncolor }: { element: React.ReactNode, btncolo
   // 배경색을 애니메이션 값에 따라 설정
   const interpolatedColor = backgroundColor.interpolate({
     inputRange: [0, 1],
-    outputRange: btncolor, // 시작 색상과 끝 색상
+    outputRange: colorOptions[btncolor], // 시작 색상과 끝 색상
   });
 
   return (
@@ -46,7 +77,7 @@ const ButtonCustom = ({ element, btncolor }: { element: React.ReactNode, btncolo
           />
         </View>
         <View style={[styles.frameElem, styles.frameElemFlexBox]}>
-          {element}
+          {elements(element, text)}
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -54,6 +85,12 @@ const ButtonCustom = ({ element, btncolor }: { element: React.ReactNode, btncolo
 };
 
 const styles = StyleSheet.create({
+  elem: {
+    fontSize: 35,
+    fontFamily: "Inter-Regular",
+    color: "#fff",
+    textAlign: "left",
+  },
   buttonColorFlexBox: {
   minHeight: 83,
   minWidth: 83,
@@ -96,7 +133,6 @@ const styles = StyleSheet.create({
   width: "100%",
   paddingHorizontal: 15,
   paddingVertical: 0,
-  gap: 10
   }
   });
   

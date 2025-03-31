@@ -4,14 +4,6 @@ import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from 'react-na
 import Slider from '@react-native-community/slider';
 import ButtonCustom from "./components/ButtonCustom";
 
-import Sign from "./assets/sign.svg";
-import Perc from "./assets/perc.svg";
-import Div from "./assets/div.svg";
-import Mul from "./assets/mul.svg";
-import Sub from "./assets/sub.svg";
-import Add from "./assets/add.svg";
-import Calc from "./assets/calc.svg";
-import Equal from "./assets/equal.svg";
 import Bar from "./assets/bar.svg";
 
 export default function App() {
@@ -20,101 +12,56 @@ export default function App() {
   const [selectedElemIndex, setSelectedElemIndex] = useState(0); // 선택된 요소의 인덱스
   const [selectedColorIndex, setSelectedColorIndex] = useState(0); // 초기 색상 배열
 
-  // SVG 요소 배열
-  const elements = [
-    <Text style={styles.elem}>AC</Text>,
-    <Sign height={27.5} width={27.5} />,
-    <Perc height={27.5} width={27.5} />,
-    <Div height={27.5} width={27.5} />,
-    <Mul height={27.5} width={27.5} />,
-    <Sub height={27.5} width={27.5} />,
-    <Add height={27.5} width={27.5} />,
-    <Calc height={27.5} width={27.5} />,
-    <Equal height={27.5} width={27.5} />,
-  ];
-
-  // 색상 배열
-  const colorOptions = [
-    ["#5C5C5E", "#8C8C8C"],
-    ["#2A2A2C", "#727272"],
-    ["#FF9F0A", "#FCC78E"],
-  ];
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={[styles.menubar, styles.menubarFlexBox]}>
-        <View style={[styles.barWrapper, styles.calcFlexBox]}>
-        <Bar style={styles.barIcon} width={22} height={16} />
+    <SafeAreaView style={[styles.iphone1315, styles.containerLayout]}>
+      <StatusBar style="light" />
+      <View style={styles.container}>
+        <View style={styles.calc}>
+
+          <View style={styles.menubar}>
+            <View style={[styles.menuicon, styles.calcFlexBox]}>
+              <Bar style={styles.barIcon} width={22} height={22} stroke="#fb9d04" strokeWidth={0.5}/>
+            </View>
+          </View>
+
+          <View style={styles.indicator}>
+            <Text style={[styles.text, styles.textTypo]}>{`0+0`}</Text>
+            <Text style={[styles.text1, styles.textTypo]}>0</Text>
+          </View>
+
+          <View style={styles.buttons}>
+            <View style={styles.row2}>
+              <ButtonCustom element='text' text='AC' btncolor='gray' />
+              <ButtonCustom element='sign' btncolor='gray' />
+              <ButtonCustom element='perc' btncolor='gray' />
+              <ButtonCustom element='div' btncolor='orange' />
+            </View>
+            <View style={styles.row2} >
+              <ButtonCustom element='text' text='7' btncolor='black' />
+              <ButtonCustom element='text' text='8' btncolor='black' />
+              <ButtonCustom element='text' text='9' btncolor='black' />
+              <ButtonCustom element='mul' btncolor='orange' />
+            </View>
+            <View style={styles.row2} >
+              <ButtonCustom element='text' text='4' btncolor='black' />
+              <ButtonCustom element='text' text='5' btncolor='black' />
+              <ButtonCustom element='text' text='6' btncolor='black' />
+              <ButtonCustom element='sub' btncolor='orange' />
+            </View>
+            <View style={styles.row2} >
+              <ButtonCustom element='text' text='1' btncolor='black' />
+              <ButtonCustom element='text' text='2' btncolor='black' />
+              <ButtonCustom element='text' text='3' btncolor='black' />
+              <ButtonCustom element='add' btncolor='orange' />
+            </View>
+            <View style={styles.row2} >
+              <ButtonCustom element='calc' btncolor='black' />
+              <ButtonCustom element='text' text='0'  btncolor='black' />
+              <ButtonCustom element='text' text='.'  btncolor='black' />
+              <ButtonCustom element='equal' btncolor='orange' />
+            </View>
+          </View>
         </View>
-      </View>
-      <StatusBar style="dark" backgroundColor="#0000ff" />
-      <View style={styles.svgBackground}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      </View>
-      {/* 크기를 조정할 수 있는 박스 */}
-      <View style={[styles.resizableBox, { width: boxWidth, height: boxHeight }]}>
-        <ButtonCustom element={elements[selectedElemIndex]} btncolor={colorOptions[selectedColorIndex]} />
-      </View>
-      {/* 라디오 버튼: 요소 선택 */}
-      <View style={styles.radioContainer}>
-        {elements.map((_, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.radioButton,
-              selectedElemIndex === index && styles.radioButtonSelected,
-            ]}
-            onPress={() => setSelectedElemIndex(index)}
-          >
-            <Text style={styles.radioText}>{index + 1}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      {/* 라디오 버튼: 색상 선택 */}
-      <View style={styles.radioContainer}>
-        {colorOptions.map((color, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.radioButton,
-              selectedColorIndex === index && styles.radioButtonSelected,
-            ]}
-            onPress={() => setSelectedColorIndex(index)}
-          >
-            <View
-              style={{
-                width: 20,
-                height: 20,
-                backgroundColor: color[0],
-                borderRadius: 10,
-              }}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-      {/* 프로그래스 바: Width 조정 */}
-      <View style={styles.sliderContainer}>
-        <Text>Width: {boxWidth}</Text>
-        <Slider
-          style={styles.slider}
-          minimumValue={83}
-          maximumValue={300}
-          step={1}
-          value={boxWidth}
-          onValueChange={(value) => setBoxWidth(value)}
-        />
-      </View>
-      {/* 프로그래스 바: Height 조정 */}
-      <View style={styles.sliderContainer}>
-        <Text>Height: {boxHeight}</Text>
-        <Slider
-          style={styles.slider}
-          minimumValue={83}
-          maximumValue={300}
-          step={1}
-          value={boxHeight}
-          onValueChange={(value) => setBoxHeight(value)}
-        />
       </View>
     </SafeAreaView>
   );
@@ -122,81 +69,95 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: "stretch",
+    backgroundColor: "black",
+    overflow: "hidden",
   },
-  svgBackground: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 12,
+  containerLayout: {
+    backgroundColor: "black",
+    overflow: "hidden"
   },
-  elem: {
-    fontSize: 35,
-    fontFamily: "Inter-Regular",
-    color: "#fff",
-    textAlign: "left",
+  calc: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    gap: 10,
+    flex: 1,
+    alignSelf: "stretch",
   },
-  resizableBox: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  sliderContainer: {
-    width: '80%',
-    marginTop: 20,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  radioContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  radioButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5,
-  },
-  radioButtonSelected: {
-    backgroundColor: '#000',
-  },
-  radioText: {
-    color: '#fff',
-    fontSize: 16,
+  calcFlexBox: {
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    alignSelf: "stretch"
   },
   menubarFlexBox: {
     justifyContent: "flex-end",
     overflow: "hidden"
-    },
-    barIcon: {},
-barWrapper: {
-width: 34,
-height: 26
-},
-menubar: {
-height: 46,
-paddingLeft: 12,
-paddingTop: 30,
-zIndex: 1,
-width: 390,
-left: 0,
-top: 0,
-position: "absolute"
-},
-
-calcFlexBox: {
-  justifyContent: "center",
-  alignItems: "center"
   },
+  textTypo: {
+    textAlign: "right",
+    fontFamily: "Inter-Regular"
+  },
+  barIcon: {},
+  menuicon: {
+    width: 34,
+    height: 26
+  },
+  menubar: {
+    display: "flex",
+    paddingTop: 12,
+    paddingLeft: 12,
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
+    position: "absolute",
+  },
+  text: {
+    fontSize: 30,
+    color: "#8d8c93"
+  },
+  text1: {
+    fontSize: 71,
+    color: "#fff"
+  },
+  indicator: {
+    display: "flex",
+    paddingHorizontal: 17,
+    paddingVertical: 0,
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    flex: 1,
+    alignSelf: "stretch",
+  },
+  buttons: {
+    display: "flex",
+    paddingHorizontal: 12,
+    paddingTop: 0,
+    paddingBottom: 30,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 7,
+    alignSelf: "stretch",
+  },
+  row2: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    minHeight: 83,
+  },
+  iphone1315: {
+    width: "100%",
+    overflow: "hidden",
+    flex: 1
+  }
 });
