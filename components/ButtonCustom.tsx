@@ -1,14 +1,15 @@
 import React, { useRef } from "react";
-import { StyleSheet, View, Text, TouchableWithoutFeedback, Animated, Easing } from "react-native";
+import { StyleSheet, View, Text, Pressable , Animated, Easing } from "react-native";
 
-import Sign  from "../assets/sign.svg";
-import Perc  from "../assets/perc.svg";
-import Div   from "../assets/div.svg";
-import Mul   from "../assets/mul.svg";
-import Sub   from "../assets/sub.svg";
-import Add   from "../assets/add.svg";
-import Calc  from "../assets/calc.svg";
+import Sign from "../assets/sign.svg";
+import Perc from "../assets/perc.svg";
+import Div from "../assets/div.svg";
+import Mul from "../assets/mul.svg";
+import Sub from "../assets/sub.svg";
+import Add from "../assets/add.svg";
+import Calc from "../assets/calc.svg";
 import Equal from "../assets/equal.svg";
+import Back from "../assets/back.svg";
 
 const colorOptions = {
   gray: ["#5C5C5E", "#8C8C8C"],
@@ -17,7 +18,7 @@ const colorOptions = {
 };
 
 const svgMap = {
-  text: <Text/>,
+  text: <Text />,
   sign: <Sign height={27.5} width={27.5} />,
   perc: <Perc height={27.5} width={27.5} />,
   div: <Div height={27.5} width={27.5} />,
@@ -26,6 +27,7 @@ const svgMap = {
   add: <Add height={27.5} width={27.5} />,
   calc: <Calc height={27.5} width={27.5} />,
   equal: <Equal height={27.5} width={27.5} />,
+  back: <Back height={38} width={38} />,
 };
 
 const elements = (
@@ -33,7 +35,14 @@ const elements = (
   element !== 'text' && svgMap[element.toLowerCase() as keyof typeof svgMap] ? svgMap[element.toLowerCase() as keyof typeof svgMap] : <Text style={styles.elem}>{text || "AC"}</Text>;
 
 
-const ButtonCustom = ({ element, text, btncolor }: { element: keyof typeof svgMap, text?: string,btncolor: keyof typeof colorOptions }) => {
+const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }: { 
+  element: keyof typeof svgMap, 
+  text?: string, 
+  btncolor: keyof typeof colorOptions
+  onPress?: () => void;
+  onLongPress?: () => void;
+  bgColor?: string []
+ }) => {
   const backgroundColor = useRef(new Animated.Value(0)).current; // 애니메이션 값 초기화
 
   const handlePressIn = () => {
@@ -58,15 +67,16 @@ const ButtonCustom = ({ element, text, btncolor }: { element: keyof typeof svgMa
   // 배경색을 애니메이션 값에 따라 설정
   const interpolatedColor = backgroundColor.interpolate({
     inputRange: [0, 1],
-    outputRange: colorOptions[btncolor], // 시작 색상과 끝 색상
+    outputRange: bgColor || colorOptions[btncolor], // 시작 색상과 끝 색상
   });
 
   return (
-    <TouchableWithoutFeedback
+    <Pressable style={[styles.ButtonCustom, styles.buttonColorFlexBox]}
+      onPress={onPress}
+      onLongPress={onLongPress}
       onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      onPressOut={handlePressOut} 
     >
-      <View style={[styles.ButtonCustom, styles.buttonColorFlexBox]}>
         <View style={[styles.buttonGrayColor, styles.buttonColorFlexBox]}>
           <Animated.View
             style={[
@@ -79,8 +89,7 @@ const ButtonCustom = ({ element, text, btncolor }: { element: keyof typeof svgMa
         <View style={[styles.frameElem, styles.frameElemFlexBox]}>
           {elements(element, text)}
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+    </Pressable >
   );
 };
 
@@ -92,49 +101,49 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonColorFlexBox: {
-  minHeight: 83,
-  minWidth: 83,
-  justifyContent: "center",
-  alignItems: "center",
-  flexDirection: "row",
-  height: 83,
-  flex: 1
+    minHeight: 83,
+    minWidth: 83,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    height: 83,
+    flex: 1
   },
   frameElemFlexBox: {
-  justifyContent: "center",
-  alignItems: "center"
+    justifyContent: "center",
+    alignItems: "center"
   },
   circleFrame: {
-  borderRadius: 50,
-  alignItems: "center",
-  height: 83,
-  flex: 1
+    borderRadius: 50,
+    alignItems: "center",
+    height: 83,
+    flex: 1
   },
   buttonGrayColor: {
-  zIndex: 0
+    zIndex: 0
   },
   ac: {
-  alignSelf: "stretch",
-  fontSize: 35,
-  fontFamily: "Inter-Regular",
-  color: "#fff",
-  textAlign: "left",
-  flex: 1
+    alignSelf: "stretch",
+    fontSize: 35,
+    fontFamily: "Inter-Regular",
+    color: "#fff",
+    textAlign: "left",
+    flex: 1
   },
   frameElem: {
-  position: "absolute",
-  width: 68,
-  padding: 10,
-  zIndex: 1,
-  flexDirection: "row",
-  alignItems: "center"
+    position: "absolute",
+    width: 68,
+    padding: 10,
+    zIndex: 1,
+    flexDirection: "row",
+    alignItems: "center"
   },
   ButtonCustom: {
-  width: "100%",
-  paddingHorizontal: 15,
-  paddingVertical: 0,
+    width: "100%",
+    paddingHorizontal: 15,
+    paddingVertical: 0,
   }
-  });
-  
+});
+
 
 export default ButtonCustom;
