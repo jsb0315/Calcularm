@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { StyleSheet, View, Text, Pressable, Animated, Easing } from "react-native";
+import { StyleSheet, View, Text, Pressable, Animated, Easing, Platform } from "react-native";
 
 import Sign from "../assets/sign.svg";
 import Perc from "../assets/perc.svg";
@@ -95,7 +95,7 @@ const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }
 
 const styles = StyleSheet.create({
   elem: {
-    fontSize: 34.5,
+    fontSize: Platform.OS === 'ios' ? 35 : 31,
     fontFamily: "Inter-Regular",
     color: "#fff",
     textAlign: "left",
