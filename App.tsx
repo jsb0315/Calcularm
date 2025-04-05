@@ -22,7 +22,7 @@ export default function App() {
   // ✅ 알림 권한 설정
   Notifications.setNotificationHandler({
     handleNotification: async () => {
-      Vibration.vibrate(1000); // 1초 동안 진동
+      Vibration.vibrate(500); // 0.5초 동안 진동
       return {
         shouldShowAlert: true,
         shouldPlaySound: true,
@@ -76,8 +76,8 @@ export default function App() {
       //   alarmTime.setDate(alarmTime.getDate() + 1); // 이미 지난 시간이면 다음 날로 설정
       // }
       // i초 후마다 알람 설정
-      for (let i = 1; i <= 10; i++) {
-        const repeatedAlarmTime = new Date(alarmTime.getTime() + i * 2000); // i초 후 추가
+      for (let i = 0; i < 10; i++) {
+        const repeatedAlarmTime = new Date(alarmTime.getTime() + i * 3000); // i초 후 추가
         await Notifications.scheduleNotificationAsync({
           content: {
             title: "⏰ 반복 알람!",
