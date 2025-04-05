@@ -318,6 +318,7 @@ export default function App() {
                 text={(textPrev && textNext) || !textNext.length ? "AC" : "back"}
                 btncolor="gray"
                 onPress={handleACOrBack}
+                onLongPress={() => setTextNext("")}
                 bgColor={Running ? ["#FF1616", "#fe6d65"] : undefined}
               />
               <ButtonCustom
