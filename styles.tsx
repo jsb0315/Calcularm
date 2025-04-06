@@ -48,13 +48,27 @@ const styles = StyleSheet.create({
     position: "absolute",
     paddingTop: Platform.OS === "ios" ? 12 : Constants.statusBarHeight + 20,
   },
+  text_format_prev: {
+    fontSize: 20,
+    color: "#8d8c93",
+  },
   text_prev: {
     fontSize: 30,
     color: "#8d8c93",
   },
+  text_format_next: {
+    fontSize: 50,
+    color: "#fff",
+    paddingBottom: 5
+  },
   text_next: {
     fontSize: 71,
     color: "#fff",
+  },
+  rowView: {
+    display: "flex",
+    alignItems: "flex-end",
+    flexDirection: "row",
   },
   indicator: {
     display: "flex",

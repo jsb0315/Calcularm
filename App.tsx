@@ -6,6 +6,19 @@ import Constants from 'expo-constants';
 import styles from "./styles"; // styles.ts 파일에서 가져오기
 import * as Notifications from 'expo-notifications';
 
+/* 
+ToDo 
+[] 편의성 패치
+[] 알람 분할 기능
+[] 알람 반복 기능
+[] 12Format용 키패드 로직(50%)
+[] 알람 당기기
+[] 알람 미루기
+[] . 버튼: 초단위 표기
+[] 사용법
+*/
+
+
 import {
   getCurrentTimeAsString,
   handleFixTimeValue,
@@ -13,7 +26,9 @@ import {
   addTime,
   subtractTime,
   fixTextTime,
-  timeValueTotext
+  timeValueTotext,
+  flipAMPM,
+  formatTime
 } from "./utils/calculate"; // 계산 함수 가져오기
 
 import Bar from "./assets/bar.svg";
@@ -98,20 +113,23 @@ export default function App() {
   const [textPrev, setTextPrev] = useState(""); // 남은시간
   const [textNext, setTextNext] = useState(""); // 설정한 알람시간
   const [Operator, setOperator] = useState("");
+  const [is12Format , setIs12Format] = useState(false);
+  const [isIterSetting, setIsIterSetting] = useState<"Mul" | "Div" | "">("");
+  const [Iterate, setIterate] = useState({Mul: "", Div: ""});
   const [Running, setisRunning] = useState(false); // 계산 중인지 여부
   const [AlarmTriggered, setAlarmTriggered] = useState(false); // 알람이 울렸는지 여부
 
   // 현재 시간과 남은 시간을 갱신하는 함수
   const updateTimes = () => {
     const currentTime = getCurrentTimeAsString(); // 현재 시간 가져오기
-    setTextCurrent(currentTime.format); // 현재 시간 갱신
+    setTextCurrent(currentTime.string); // 현재 시간 갱신
 
     if (textNext) {
       const textTime = handleFixTimeValue(textNext); // textNext를 시간으로 변환
       const currentDate = new Date();
       const timeDifference = calculateTimeDifference(currentDate, textTime); // 남은 시간 계산
       setTextPrev(timeDifference === "0000" ? "+ 2400" : '+ '+timeDifference); // 남은 시간 갱신
-  
+
       // 알람 체크: 현재 시간이 textNext와 같아지면 알람 트리거
       if (currentTime.string === textNext && !AlarmTriggered) {
         setAlarmTriggered(true); // 알람 상태를 true로 설정
@@ -135,17 +153,38 @@ export default function App() {
 
     if (Running) {
       interval = setInterval(() => {
-        updateTimes(); // 2초마다 실행
-      }, 2000);
+        updateTimes(); // 1초마다 실행
+      }, 1000);
     } else if (interval) {
       clearInterval(interval); // Running이 false가 되면 타이머 정리
       setAlarmTriggered(false);
     }
 
+    // if (is12Format) {
+    //   if (textNext.length === 3 && Number(textNext.slice(0,2)) > 24) 
+    //     setTextNext((prev) => '0'+prev);
+    //   else if (textNext.length === 4 && Number(textNext.slice(-2)) > 59) 
+    //     setTextNext('');
+    // }
+
     return () => {
       if (interval) clearInterval(interval); // 컴포넌트 언마운트 시 타이머 정리
     };
-  }, [Running, textNext]); // Running 또는 textNext가 변경될 때 실행
+  }, [Running, textNext, is12Format]); // Running 또는 textNext가 변경될 때 실행
+
+  const convertTo12HourFormat = (timeString: string) : {format: "AM" | "PM" | "", time: string} => {
+    let result: {format: "AM" | "PM" | "", time: string} = {format: "", time: timeString};
+    if (is12Format) {
+      let flippedTime = fixTextTime(timeString); // 정렬한번 때리고(2500 -> 0100)
+      const currentTime = handleFixTimeValue(flippedTime); // textNext를 시간으로 변환
+      if ((currentTime.hours / 12 | 0)) { // 오후일 경우
+        result = {format: "PM", time: `${currentTime.hours === 12 ? flippedTime : flipAMPM(flippedTime)}`};
+      } else {  // 오후일 경우
+        result = {format: "AM", time: `${currentTime.hours === 0 ? flipAMPM(flippedTime) : flippedTime}`};
+      }
+    }
+    return result; // is12Format이 false일 경우 그대로 반환
+  };
 
   // 함수 선언
   const handleACOrBack = () => {
@@ -170,12 +209,39 @@ export default function App() {
   };
 
   const handleNumberPress = (num: string) => {
+    if (isIterSetting) {
+      if (num==="0") {
+        setIterate((prev) => ({ ...prev, [isIterSetting]: "" })); // Iterate 상태 초기화
+        setIsIterSetting(""); // isIterSetting 초기화
+        return;
+      }
+      setIterate((prev) => {
+        // 이미 해당 key의 value가 존재하면 초기화
+        if (prev[isIterSetting]) {
+          return { ...prev, [isIterSetting]: "" }; // 초기화
+        }
+        return { ...prev, [isIterSetting]: num }; // 새로운 값 설정
+      });
+      setIsIterSetting(""); // isIterSetting 초기화
+      return;
+    }
     if (!Running) {
       if (textPrev && textNext) {
         setTextPrev(""); // textPrev 초기화
         setTextCurrent("");
         setTextNext(num); // textNext에 숫자 설정
       } else if (textNext.length < 4) {
+        const test = textNext + num;
+        if (is12Format && Operator === "") {
+          if (test.length === 3 && Number(test.slice(0,2)) > 24) {
+            setTextNext('0'+test);
+            return;
+          }
+          else if (test.length === 4 && Number(test.slice(-2)) > 59) {
+            setTextNext(''); 
+            return
+          }
+        } 
         setTextNext((prev) => prev + num);
       } else {
         setTextNext(num); // 최대 4자리까지 입력 가능
@@ -196,13 +262,19 @@ export default function App() {
       }
       else if (Operator === "") { // 일반설정
         // 현재부터 textTime까지 남은 시간 계산
-        const fixedTime = textNext.length < 3 ? fixTextTime((Number(textNext) > currentTime.getMinutes() ? currentTimeString.hour : (currentTimeString.hour + 1)) + (textNext.length === 1 ? '0' : '') + textNext)
+        let fixedTime = textNext.length < 3 ? fixTextTime((Number(textNext) > currentTime.getMinutes() ? currentTimeString.hour : (currentTimeString.hour + 1)) + (textNext.length === 1 ? '0' : '') + textNext)
          : fixTextTime(textNext);
         textTime = handleFixTimeValue(fixedTime); // textNext를 시간으로 변환한 값
-        const timeDifference = calculateTimeDifference(currentTime, textTime);
-        console.log(timeDifference)
+        let timeDifference = calculateTimeDifference(currentTime, textTime);
+        const timeDifferenceValue = handleFixTimeValue(timeDifference); // 남은 시간 계산
+        
+        if (textNext.length < 4 && timeDifferenceValue.hours+(timeDifferenceValue.minutes*0.01) > 12) { // 12시간 이상 남은 경우
+          fixedTime = flipAMPM(fixedTime);
+          timeDifference = flipAMPM(timeDifference);
+        }
+      
         // textPrev에 현재 시간과 남은 시간 저장
-        setTextCurrent(currentTimeString.format);
+        setTextCurrent(currentTimeString.string);
         setTextPrev(`+ ${timeDifference == '0000' ? '2400' : timeDifference}`);
         setTextNext(fixedTime);
 
@@ -211,7 +283,7 @@ export default function App() {
         textTime = addTime(currentTime, handleFixTimeValue(textNext));
 
         // textPrev와 textNext 업데이트
-        setTextCurrent(currentTimeString.format);
+        setTextCurrent(currentTimeString.string);
         setTextPrev(`+ ${fixTextTime('0'.repeat(4 - textNext.length) + textNext)}`);
         setTextNext(timeValueTotext(textTime));
 
@@ -220,7 +292,7 @@ export default function App() {
         textTime = subtractTime(currentTime, handleFixTimeValue(textNext));
 
         // textPrev와 textNext 업데이트
-        setTextCurrent(currentTimeString.format);
+        setTextCurrent(currentTimeString.string);
         setTextPrev(`- ${fixTextTime('0'.repeat(4 - textNext.length) + textNext)}`);
         setTextNext(timeValueTotext(textTime));
       }
@@ -250,33 +322,27 @@ export default function App() {
     }
   };
 
-  const flipAMPM = (text: string) => {
-      if (text.length === 3) {
-        text = `0${text}`; // 3자리일 경우 가장 앞에 '0' 추가
-      }
-
-      if (text.length !== 4 || isNaN(Number(text))) {
-        return text; // 유효하지 않은 값은 그대로 반환
-      }
-
-      // 1. '2000'을 '20:00'으로 변환
-      const hours = parseInt(text.slice(0, 2), 10);
-      const minutes = text.slice(2);
-
-      // 2. 12시간 추가
-      const newHours = (hours + 12) % 24; // 24시간 형식으로 계산
-      const formattedHours = newHours < 10 ? `0${newHours}` : `${newHours}`;
-
-      // 3. '800' 형식으로 변환
-      return `${formattedHours}${minutes}`;
-    }
-
   const handleFixTime = () => {
     if (!Running){}
       setTextNext((prev) => fixTextTime(prev)); // textNext를 fixTextTime으로 변환
   };
 
-  
+  const handleIteratePress = (key: "Mul" | "Div") => {
+    if (Iterate[key]) {
+      // 이미 값이 존재하면 초기화
+      setIterate((prev) => ({ ...prev, [key]: "" }));
+      setIsIterSetting("");
+    } else if (isIterSetting === key) {
+      // 현재 설정 중인 키를 다시 누르면 초기화
+      setIsIterSetting("");
+    } else {
+      // 새로운 키를 설정
+      setIsIterSetting(key);
+    }
+  };
+
+  const showtextCurrent = convertTo12HourFormat(textCurrent);
+  const showtextNext = convertTo12HourFormat(textNext);
 
   return (
     <SafeAreaView style={[styles.iphone1315, styles.containerLayout]}>
@@ -296,19 +362,30 @@ export default function App() {
           </View>
 
           <View style={styles.indicator}>
-            <Text style={[styles.text_prev, styles.textTypo]}>
-              {textCurrent && '현재시간  '}{textCurrent}
-            </Text>
+            <View style={styles.rowView}>
+              <Text style={[styles.text_format_prev, styles.textTypo]}>
+                {textCurrent && ('현재시간⠀'+showtextCurrent.format)}
+              </Text>
+              <Text style={[styles.text_prev, styles.textTypo]}>
+                {formatTime((showtextCurrent.time), is12Format)}
+              </Text>
+            </View>
             <Text style={[styles.text_prev, styles.textTypo]}>
               {textPrev.length > 2
-                ? `${textPrev.slice(0, -2)}:${textPrev.slice(-2)}`
+                ? formatTime(textPrev)
                 : textPrev}
             </Text>
-            <Text style={[styles.text_next, styles.textTypo]}>
-              {!Running && textNext && Operator}{textNext.length > 2
-                ? `${textNext.slice(0, -2)}:${textNext.slice(-2)}`
-                : textNext.length ? textNext : "0"}
-            </Text>
+
+            <View style={styles.rowView}>
+              <Text style={[styles.text_format_next, styles.textTypo]}>
+                {(Running || !Operator.length) && textNext.length > 2 && showtextNext.format}
+              </Text>
+              <Text style={[styles.text_next, styles.textTypo]}>
+                {!Running && textNext && Operator}{textNext.length > 2
+                  ? formatTime(Operator ? textNext : showtextNext.time, is12Format)
+                  : textNext.length ? textNext : "0"}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.buttons}>
@@ -327,11 +404,14 @@ export default function App() {
               />
               <ButtonCustom
                 element="perc" text="%" btncolor="gray"
-                onPress={() => handleFixTime()}
+                onPress={() => {setIs12Format(!is12Format)}}
               />
               <ButtonCustom
-                element="div" text="÷" btncolor="orange"
-                onPress={() => handleFixTime()}
+                element={Iterate.Div ? "text" : "div"}
+                text={`÷${Iterate.Div || ""}`}
+                btncolor="orange"
+                onPress={() => handleIteratePress("Div")}
+                bgColor={isIterSetting === "Div" ? ["#fb7103", "#FCC78E"] : undefined}
               />
             </View>
             <View style={styles.row2}>
@@ -343,8 +423,11 @@ export default function App() {
                 />
               ))}
               <ButtonCustom
-                element="mul" text="×" btncolor="orange"
-                onPress={() => handleOperatorPress("×")}
+                element={Iterate.Mul ? "text" : "mul"}
+                text={`×${Iterate.Mul || ""}`}
+                btncolor="orange"
+                onPress={() => handleIteratePress("Mul")}
+                bgColor={isIterSetting === "Mul" ? ["#fb7103", "#FCC78E"] : undefined}
               />
             </View>
             <View style={styles.row2}>

@@ -9,7 +9,6 @@ export const getCurrentTimeAsString = () => {
 
   return {
     string: `${formattedHours}${formattedMinutes}`, // '0000' 형태
-    format: `${formattedHours}:${formattedMinutes}`, // '00:00' 형태
     hour: hours,
     minute: minutes,
   };
@@ -110,11 +109,11 @@ export const fixTextTime = (text: string) => {
   if (hours >= 24) {
     hours = hours % 24;
   }
-
+  
   // 4. 시간과 분을 두 자리 형식으로 변환
   const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
   const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-
+  
   // 5. 결과 반환
   // console.log(Number(calculateTimeDifference(new Date(), { hours, minutes }).slice(0, 2)) > 12 ? handleFlipAMPM(`${formattedHours}${formattedMinutes}`) : `${formattedHours}${formattedMinutes}`);
   return `${formattedHours}${formattedMinutes}`;
@@ -123,3 +122,35 @@ export const fixTextTime = (text: string) => {
 export const timeValueTotext = ({ hours, minutes }: { hours: number; minutes: number }) => {
   return `${hours < 10 ? `0${hours}` : hours}${minutes < 10 ? `0${minutes}` : minutes}`;
 };
+
+export const flipAMPM = (text: string) => {
+      if (text.length === 3) {
+        text = `0${text}`; // 3자리일 경우 가장 앞에 '0' 추가
+      }
+
+      if (text.length !== 4 || isNaN(Number(text))) {
+        return text; // 유효하지 않은 값은 그대로 반환
+      }
+
+      // 1. '2000'을 '20:00'으로 변환
+      const hours = parseInt(text.slice(0, 2), 10);
+      const minutes = text.slice(2);
+
+      // 2. 12시간 추가
+      const newHours = (hours + 12) % 24; // 24시간 형식으로 계산
+      const formattedHours = newHours < 10 ? `0${newHours}` : `${newHours}`;
+
+      // 3. '800' 형식으로 변환
+      return `${formattedHours}${minutes}`;
+    }
+
+
+export const formatTime = (time: string, format_24?: boolean) => {
+  if (format_24) {
+    if (time.startsWith("0")) {
+      time = time.slice(1); // 가장 앞자리가 '0'이면 제거
+    }
+    
+  }
+  return time.length ? `${time.slice(0, -2)}:${time.slice(-2)}` : '';
+}
