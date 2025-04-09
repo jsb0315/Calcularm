@@ -96,8 +96,8 @@ export default function App() {
             date: repeatedAlarmTime,
           },
         });
-        console.log(`알람 ${i} 설정: ${repeatedAlarmTime}`);
       }
+      console.log(`알람 설정 * 10: ${alarmTime} ~ +30s`);
     }
   
   const [textCurrent, setTextCurrent] = useState(""); // 현재시간
@@ -106,7 +106,7 @@ export default function App() {
   const [Operator, setOperator] = useState("");
   const [is12Format , setIs12Format] = useState(false);
   const [isIterSetting, setIsIterSetting] = useState<"Mul" | "Div" | "">("");
-  const [Iterate, setIterate] = useState({Mul: 0, Div: 0});
+  const [Iterate, setIterate] = useState({Mul: 1, Div: 1});
   const [Running, setisRunning] = useState(false); // 계산 중인지 여부
   const [AlarmTriggered, setAlarmTriggered] = useState(false); // 알람이 울렸는지 여부
 
@@ -176,7 +176,6 @@ export default function App() {
       test = "";
     } 
     else if (textNext.length > 1) {  // 'back' 동작
-      console.log(is12Format, textNext, calculate.flipAMPM(textNext));
       if (is12Format && textNext.length === 4) {
         if (/^(10|11|12|22|23|00)/.test(textNext)) { // 레전드 예외처리 하드코딩
           /**
@@ -203,7 +202,6 @@ export default function App() {
 
           test = transformed + suffix;
           test = test.length === 5 ? test.slice(0, -1) : test;
-          console.log("레전드 예외처리 하드코딩", test);
         }
         else 
           test = textNext.startsWith("0") ? textNext.slice(1, -1) : calculate.flipAMPM(textNext).slice(1, -1);
@@ -222,15 +220,15 @@ export default function App() {
 
   const handleNumberPress = (num: string) => {
     if (isIterSetting) {
-      if (num==="0") {
-        setIterate((prev) => ({ ...prev, [isIterSetting]: 0 })); // Iterate 상태 초기화
+      if (num==="0" || num==="1") {
+        setIterate((prev) => ({ ...prev, [isIterSetting]: 1 })); // Iterate 상태 초기화
         setIsIterSetting(""); // isIterSetting 초기화
         return;
       }
       setIterate((prev) => {
         // 이미 해당 key의 value가 존재하면 초기화
-        if (prev[isIterSetting]) {
-          return { ...prev, [isIterSetting]: 0 }; // 초기화
+        if (prev[isIterSetting] > 1) {
+          return { ...prev, [isIterSetting]: 1 }; // 초기화
         }
         return { ...prev, [isIterSetting]: Number(num) }; // 새로운 값 설정
       });
@@ -266,6 +264,7 @@ export default function App() {
       const currentTime = new Date();
       const currentTimeString = calculate.getCurrentTimeAsString(); // '0000' 형태의 현재 시간
       let textTime: {hours: number, minutes: number} = {hours: 0, minutes: 0};
+      let timeDifference: string;
 
       if (!textNext.length) { // 아무것도 없을때
         setTextPrev(textNext); // textNext 값을 textPrev로 복사
@@ -277,13 +276,13 @@ export default function App() {
         let fixedTime = textNext.length < 3 ? calculate.fixTextTime((Number(textNext) > currentTime.getMinutes() ? currentTimeString.hour : (currentTimeString.hour + 1)) + (textNext.length === 1 ? '0' : '') + textNext)
          : calculate.fixTextTime(textNext);
         textTime = calculate.handleFixTimeValue(fixedTime); // textNext를 시간으로 변환한 값
-        let timeDifference = calculate.calculateTimeDifference(currentTime, textTime);
+        timeDifference = calculate.calculateTimeDifference(currentTime, textTime);
         const timeDifferenceValue = calculate.handleFixTimeValue(timeDifference); // 남은 시간 계산
-        
-        if (textNext.length < 4 && timeDifferenceValue.hours+(timeDifferenceValue.minutes*0.01) > 12) { // 12시간 이상 남은 경우
+        const is12up = timeDifferenceValue.hours+(timeDifferenceValue.minutes*0.01) > 12;
+        if ((textNext.length < 4 || textNext.startsWith("12")) && is12up ) { // 12시간 이상 남은 경우
           fixedTime = calculate.flipAMPM(fixedTime);
           timeDifference = calculate.flipAMPM(timeDifference);
-        }
+        } 
       
         // textPrev에 현재 시간과 남은 시간 저장
         setTextCurrent(currentTimeString.string);
@@ -315,6 +314,23 @@ export default function App() {
     }
   };
 
+  /**
+   * 알림을 다음 조건에 맞춰 예약하고싶어. 조건에 맞게 코드를 작성해줘
+[변수]
+Iterate = {Mul: Number, Div: Number} 형태 (useState)
+시간 객체 = {hours: Number, minutes: Number}
+textTime = 알람 설정 시각 객체
+timeDifferenceValue = 알람까지 남은시간
+textTime = 더하거나 뺀  시간 객체
+currentTime = 현재 시간 Date() 객체
+[조건]
+timeDifferenceValue의 시간을 Iterate.Div만큼 균일하게 나눠 알람 설정(timeDifferenceValue = 1시간, Iterate.Div = 6일때 1시간동안 1/6시간동안 6번 울림)
+Operator === "": 
+   textTime으로부터 [Iterate.Mul]일 동안 textTime 시간에 알람 설정(textTime = 오전 7시,  Iterate.Mul = 3일 때 오전 7시, 1일 후 오전 7시, 2일 후 오전 7시에 3번 울림)
+Operator === "+": 
+   currentTime부터 [Iterate.Mul]일 동안 textTime 시간에 알람 설정(textTime = 오전 7시,  Iterate.Mul = 3일 때 오전 7시, 1일 후 오전 7시, 2일 후 오전 7시에 3번 울림)
+Operator === "-": 
+   */
   const handleDotPress = () => {
     if (!Running) {
       setTextNext((prev) => (prev.includes(".") ? prev : prev + "."));
@@ -340,13 +356,14 @@ export default function App() {
   };
 
   const handleIteratePress = (key: "Mul" | "Div") => {
+    console.log(Iterate.Div, Iterate.Mul);
     if (Running) {
       console.log("Iter info View");
       return; // Running 상태일 때는 아무 작업도 하지 않음
     }
-    if (Iterate[key]) {
+    if (Iterate[key] > 1) {
       // 이미 값이 존재하면 초기화
-      setIterate((prev) => ({ ...prev, [key]: 0 }));
+      setIterate((prev) => ({ ...prev, [key]: 1 }));
       setIsIterSetting("");
     } else if (isIterSetting === key) {
       // 현재 설정 중인 키를 다시 누르면 초기화
@@ -411,7 +428,7 @@ export default function App() {
                 text={(textPrev && textNext) || !textNext.length ? "AC" : "back"}
                 btncolor="gray"
                 onPress={handleACOrBack}
-                onLongPress={() => setTextNext("")}
+                onLongPress={Running ? undefined : () => setTextNext("")}
                 bgColor={Running ? ["#FF1616", "#fe6d65"] : undefined}
               />
               <ButtonCustom
@@ -423,8 +440,8 @@ export default function App() {
                 onPress={() => {setIs12Format(!is12Format); setTextNext((prev) => calculate.isDifferent12up(prev) ? calculate.flipAMPM(prev) : prev)}}
               />
               <ButtonCustom
-                element={Iterate.Div ? "text" : "div"}
-                text={`÷${Iterate.Div || ""}`}
+                element={Iterate.Div > 1 ? "text" : "div"}
+                text={`÷${Iterate.Div > 1 ? Iterate.Div : ""}`}
                 btncolor="orange"
                 onPress={() => handleIteratePress("Div")}
                 bgColor={isIterSetting === "Div" ? ["#fb7103", "#FCC78E"] : undefined}
@@ -439,8 +456,8 @@ export default function App() {
                 />
               ))}
               <ButtonCustom
-                element={Iterate.Mul ? "text" : "mul"}
-                text={`×${Iterate.Mul || ""}`}
+                element={Iterate.Mul > 1 ? "text" : "mul"}
+                text={`×${Iterate.Mul > 1 ? Iterate.Mul : ""}`}
                 btncolor="orange"
                 onPress={() => handleIteratePress("Mul")}
                 bgColor={isIterSetting === "Mul" ? ["#fb7103", "#FCC78E"] : undefined}
