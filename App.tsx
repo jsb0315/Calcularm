@@ -319,17 +319,20 @@ export default function App() {
 [변수]
 Iterate = {Mul: Number, Div: Number} 형태 (useState)
 시간 객체 = {hours: Number, minutes: Number}
+textNext = 시간 문자열 temp 값
 textTime = 알람 설정 시각 객체
 timeDifferenceValue = 알람까지 남은시간
-textTime = 더하거나 뺀  시간 객체
 currentTime = 현재 시간 Date() 객체
 [조건]
+- 알람 설정 1단계, Div 사용)
 timeDifferenceValue의 시간을 Iterate.Div만큼 균일하게 나눠 알람 설정(timeDifferenceValue = 1시간, Iterate.Div = 6일때 1시간동안 1/6시간동안 6번 울림)
+- 2단계, 조건 Mul 사용)
 Operator === "": 
    textTime으로부터 [Iterate.Mul]일 동안 textTime 시간에 알람 설정(textTime = 오전 7시,  Iterate.Mul = 3일 때 오전 7시, 1일 후 오전 7시, 2일 후 오전 7시에 3번 울림)
 Operator === "+": 
-   currentTime부터 [Iterate.Mul]일 동안 textTime 시간에 알람 설정(textTime = 오전 7시,  Iterate.Mul = 3일 때 오전 7시, 1일 후 오전 7시, 2일 후 오전 7시에 3번 울림)
-Operator === "-": 
+   currentTime부터 textTime 시간을 추가한 만큼 [Iterate.Mul]번 알람 설정(textTime = 30,  Iterate.Mul = 3일 때 오전 7시, 1일 후 오전 7시, 2일 후 오전 7시에 3번 울림) 
+   
+   
    */
   const handleDotPress = () => {
     if (!Running) {
