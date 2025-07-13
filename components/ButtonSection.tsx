@@ -60,7 +60,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
   setAlarmTriggered,
   handleEqualPress,
   alarmServiceRef,
-}) => {
+}) => { 
   const textValue = calculate.handleFixTimeValue(
     calculate.fixTextTime(textNext, true), true
   );
