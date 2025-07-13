@@ -15,11 +15,17 @@ export const getCurrentTimeAsString = () => {
 };
 
 // 시간 문자열을 객체로 변환
-export const handleFixTimeValue = (timeString: string) => {
+export const handleFixTimeValue = (timeString: string, raw: boolean = false) => {
   timeString = `${'0'.repeat(4 - timeString.length)}${timeString}`;
 
-  const hours = parseInt(timeString.slice(0, 2), 10);
-  const minutes = parseInt(timeString.slice(2), 10);
+  let hours = parseInt(timeString.slice(0, 2), 10);
+  let minutes = parseInt(timeString.slice(2), 10);
+  if (raw) {
+    if (minutes >= 60) {
+      hours = parseInt(timeString.slice(0, 3), 10);
+      minutes = parseInt(timeString.slice(3), 10);
+    }
+  }
 
   return { hours, minutes };
 };

@@ -62,7 +62,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
   alarmServiceRef,
 }) => {
   const textValue = calculate.handleFixTimeValue(
-    calculate.fixTextTime(textNext, true)
+    calculate.fixTextTime(textNext, true), true
   );
   const textLength = textNext.length;
   let disabledList: boolean[] = Array(10).fill(false);
