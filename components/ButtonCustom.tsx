@@ -10,6 +10,7 @@ import Add from "../assets/add.svg";
 import Calc from "../assets/calc.svg";
 import Equal from "../assets/equal.svg";
 import Back from "../assets/back.svg";
+import AMPM from "../assets/AMPM.svg";
 
 const colorOptions = {
   gray: ["#5C5C5E", "#8C8C8C"],
@@ -21,6 +22,7 @@ const svgMap = {
   text: <Text />,
   sign: <Sign height={27.5} width={27.5} />,
   perc: <Perc height={27.5} width={27.5} />,
+  ampm: <AMPM height={34} width={34} />,
   div: <Div height={27.5} width={27.5} />,
   mul: <Mul height={27.5} width={27.5} />,
   sub: <Sub height={27.5} width={27.5} />,
@@ -31,17 +33,18 @@ const svgMap = {
 };
 
 const elements = (
-  element: string, text?: string) =>
-  element !== 'text' && svgMap[element.toLowerCase() as keyof typeof svgMap] ? svgMap[element.toLowerCase() as keyof typeof svgMap] : <Text style={styles.elem}>{text || "AC"}</Text>;
+  element: string, text?: string, disabled?: boolean) =>
+  element !== 'text' && svgMap[element.toLowerCase() as keyof typeof svgMap] ? svgMap[element.toLowerCase() as keyof typeof svgMap] : <Text style={[styles.elem, disabled && styles.disabled]}>{text || "AC"}</Text>;
 
 
-const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }: {
+const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor, disabled = false }: {
   element: keyof typeof svgMap,
   text?: string,
   btncolor: keyof typeof colorOptions
   onPress?: () => void;
   onLongPress?: () => void;
-  bgColor?: string[]
+  bgColor?: string[];
+  disabled?: boolean;
 }) => {
   const backgroundColor = useRef(new Animated.Value(0)).current; // 애니메이션 값 초기화
 
@@ -69,25 +72,26 @@ const ButtonCustom = ({ element, text, btncolor, onPress, onLongPress, bgColor }
     inputRange: [0, 1],
     outputRange: bgColor || colorOptions[btncolor], // 시작 색상과 끝 색상
   });
-
   return (
     <Pressable style={[styles.ButtonCustom, styles.buttonColorFlexBox]}
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      disabled={disabled}
     >
       <View style={[styles.buttonGrayColor, styles.buttonColorFlexBox]}>
         <Animated.View
           style={[
             { backgroundColor: interpolatedColor },
+            disabled ? styles.disabled : {},
             styles.circleFrame,
             styles.frameElemFlexBox,
           ]}
         />
       </View>
       <View style={[styles.frameElem, styles.frameElemFlexBox]}>
-        {elements(element, text)}
+        {elements(element, text, disabled)}
       </View>
     </Pressable >
   );
@@ -121,6 +125,10 @@ const styles = StyleSheet.create({
   },
   buttonGrayColor: {
     zIndex: 0
+  },
+  disabled: {
+    opacity: 0.7,
+    color: "#525a69ff",
   },
   frameElem: {
     position: "absolute",

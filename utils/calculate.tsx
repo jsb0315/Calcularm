@@ -81,7 +81,7 @@ export const subtractTime = (
   return { hours, minutes };
 };
 
-export const fixTextTime = (text: string) => {
+export const fixTextTime = (text: string, raw: boolean = false ) => {
   if (text.length === 3) {
     text = `0${text}`; // 3자리일 경우 가장 앞에 '0' 추가
   } else if (text.length === 2) {
@@ -89,6 +89,9 @@ export const fixTextTime = (text: string) => {
   }
   else if (text.length === 1) {
     text = `0${text}00`; // 1자리일 경우 앞에 '000' 추가
+  }
+  if (raw) {
+    return text; // raw가 true일 경우 변환하지 않고 그대로 반환
   }
 
   if (text.length !== 4 || isNaN(Number(text))) {

@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import ButtonCustom from './ButtonCustom';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import ButtonCustom from "./ButtonCustom";
 import {
   OperatorType,
   IterateSettingType,
@@ -10,8 +10,8 @@ import {
   IteratePressHandler,
   VoidHandler,
   StateSetter,
-} from '../types';
-import * as calculate from '../utils/calculate';
+} from "../types";
+import * as calculate from "../utils/calculate";
 
 export interface ButtonSectionProps {
   // State values
@@ -22,7 +22,7 @@ export interface ButtonSectionProps {
   isIterSetting: IterateSettingType;
   Iterate: IterateSettings;
   Running: boolean;
-  
+
   // State setters
   setIs12Format: StateSetter<boolean>;
   setTextNext: StateSetter<string>;
@@ -33,10 +33,10 @@ export interface ButtonSectionProps {
   setIterate: StateSetter<IterateSettings>;
   setisRunning: StateSetter<boolean>;
   setAlarmTriggered: StateSetter<boolean>;
-  
+
   // Event handlers for parent-level actions
   handleEqualPress: VoidHandler;
-  
+
   // Alarm service ref for canceling notifications
   alarmServiceRef: React.RefObject<any>;
 }
@@ -61,6 +61,22 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
   handleEqualPress,
   alarmServiceRef,
 }) => {
+  const textValue = calculate.handleFixTimeValue(
+    calculate.fixTextTime(textNext, true)
+  );
+  const textLength = textNext.length;
+  let disabledList: boolean[] = Array(10).fill(false);
+  if (textLength === 4){
+  }
+  else if (textValue.hours > 1){
+    if (textLength === 1 || textValue.hours > 15) {
+      [6, 7, 8, 9].forEach(index => {
+        disabledList[index] = true;
+      });
+    }
+  }
+  console.log("===================", textNext, textValue);
+
   // ButtonSection 레벨 함수들
   const handleACOrBack: VoidHandler = () => {
     let test: string;
@@ -138,10 +154,10 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
       return;
     }
     if (!Running) {
-      if (textPrev && textNext) {
+      if (textPrev && textNext || textValue.minutes % 10 > 5 || (textNext.length === 3 && Number(textNext.slice(0, 2)) > 24)) {
         setTextPrev(""); // textPrev 초기화
         setTextCurrent("");
-        setTextNext(num); // textNext에 숫자 설정
+        setTextNext(num === "0" ? "" : num); // textNext에 숫자 설정
       } else if (textNext.length < 4) {
         let test: string = textNext + num;
         if (is12Format && Operator === "") {
@@ -158,7 +174,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
         }
         setTextNext((prev: string) => prev + num);
       } else {
-        setTextNext(num); // 최대 4자리까지 입력 가능
+        setTextNext(num === "0" ? "" : num); // 최대 4자리까지 입력 가능
       }
     }
   };
@@ -206,12 +222,8 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
     <>
       <View style={styles.row2}>
         <ButtonCustom
-          element={
-            (textPrev && textNext) || !textNext.length ? "text" : "back"
-          }
-          text={
-            (textPrev && textNext) || !textNext.length ? "AC" : "back"
-          }
+          element={(textPrev && textNext) || !textNext.length ? "text" : "back"}
+          text={(textPrev && textNext) || !textNext.length ? "AC" : "back"}
           btncolor="gray"
           onPress={handleACOrBack}
           onLongPress={Running ? undefined : () => setTextNext("")}
@@ -224,15 +236,13 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
           onPress={() => handleFlipAMPM()}
         />
         <ButtonCustom
-          element="perc"
+          element={is12Format ? "ampm" : "perc"}
           text="%"
           btncolor="gray"
           onPress={() => {
             setIs12Format(!is12Format);
             setTextNext(prev =>
-              calculate.isDifferent12up(prev)
-                ? calculate.flipAMPM(prev)
-                : prev
+              calculate.isDifferent12up(prev) ? calculate.flipAMPM(prev) : prev
             );
           }}
         />
@@ -241,9 +251,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
           text={`÷${Iterate.Div > 1 ? Iterate.Div : ""}`}
           btncolor="orange"
           onPress={() => handleIteratePress("Div")}
-          bgColor={
-            isIterSetting === "Div" ? ["#fb7103", "#FCC78E"] : undefined
-          }
+          bgColor={isIterSetting === "Div" ? ["#fb7103", "#FCC78E"] : undefined}
         />
       </View>
       <View style={styles.row2}>
@@ -254,6 +262,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
+            disabled={disabledList[Number(num)]}
           />
         ))}
         <ButtonCustom
@@ -261,9 +270,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
           text={`×${Iterate.Mul > 1 ? Iterate.Mul : ""}`}
           btncolor="orange"
           onPress={() => handleIteratePress("Mul")}
-          bgColor={
-            isIterSetting === "Mul" ? ["#fb7103", "#FCC78E"] : undefined
-          }
+          bgColor={isIterSetting === "Mul" ? ["#fb7103", "#FCC78E"] : undefined}
         />
       </View>
       <View style={styles.row2}>
@@ -274,6 +281,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
+            disabled={disabledList[Number(num)]}
           />
         ))}
         <ButtonCustom
@@ -292,6 +300,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
+            disabled={disabledList[Number(num)]}
           />
         ))}
         <ButtonCustom
@@ -314,6 +323,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
           text="0"
           btncolor="black"
           onPress={() => handleNumberPress("0")}
+          disabled={disabledList[0]}
         />
         <ButtonCustom
           element="text"
@@ -333,14 +343,14 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
 };
 
 const styles = StyleSheet.create({
-    row2: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        alignSelf: "stretch",
-        flexDirection: "row",
-        minHeight: 83,
-    },
+  row2: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    minHeight: 83,
+  },
 });
 
 export default ButtonSection;
