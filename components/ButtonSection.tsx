@@ -262,7 +262,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
-            disabled={disabledList[Number(num)]}
+            disabled={disabledList[Number(num)] && !isIterSetting}
           />
         ))}
         <ButtonCustom
@@ -281,7 +281,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
-            disabled={disabledList[Number(num)]}
+            disabled={disabledList[Number(num)] && !isIterSetting}
           />
         ))}
         <ButtonCustom
@@ -300,7 +300,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
             text={num}
             btncolor="black"
             onPress={() => handleNumberPress(num)}
-            disabled={disabledList[Number(num)]}
+            disabled={disabledList[Number(num)] && !isIterSetting}
           />
         ))}
         <ButtonCustom
@@ -323,7 +323,7 @@ const ButtonSection: React.FC<ButtonSectionProps> = ({
           text="0"
           btncolor="black"
           onPress={() => handleNumberPress("0")}
-          disabled={disabledList[0]}
+          disabled={disabledList[0] && !isIterSetting}
         />
         <ButtonCustom
           element="text"
